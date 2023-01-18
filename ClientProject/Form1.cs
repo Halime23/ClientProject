@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -18,37 +19,39 @@ namespace ClientProject
             InitializeComponent();
         }
 
-        SimpleTcpClient client;
+        SimpleTcpClient client; //TCP Client'ı çağırdığımız kütüphane
 
         private void btnSend_Click(object sender, EventArgs e)
         {
          if(client.IsConnected)
             {
-                if(!string.IsNullOrEmpty(txtMessage.Text))
+                if(!string.IsNullOrEmpty(txtMessage.Text)) //Mesaj olup olmama kontrolünü yapıyor. Null değilse;
                 {
-                    client.Send(txtMessage.Text);
+                    Thread.Sleep(1000);
+                    client.Send(txtMessage.Text); //Mesajı gönderiyoruz.
                     txtInfo.Text += $"Me: {txtMessage.Text}{Environment.NewLine}";
                     txtMessage.Text = string.Empty;
                 }
             }
         }
 
-        private void btnConnect_Click(object sender, EventArgs e)
+        private void btnConnect_Click(object sender, EventArgs e) //bağlantıyı gönderiyoruz.
         {
-            try
+            try //hata yönetimi
             {
-                client.Connect();
+                Thread.Sleep(1000); //1 saniye bekleyip öyle açıyor
+                client.Connect(); //client bağlanıyor
                 btnSend.Enabled = true;
                 btnConnect.Enabled = false;
             }
-            catch (Exception ex)
+            catch (Exception ex) //bağlanmadığı durumda
             {
 
-                MessageBox.Show(ex.Message, "Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Message", MessageBoxButtons.OK, MessageBoxIcon.Error); //bağlanamadım mesajı verir.
             }
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void Form1_Load(object sender, EventArgs e) //form'daki ekran bağlantılarını sağladık.
         {
             client = new(txtIP.Text);
             client.Events.Connected += Events_Connected;
@@ -62,8 +65,8 @@ namespace ClientProject
         {
             this.Invoke((MethodInvoker)delegate
             {
-                txtInfo.Text += $"Server: {Encoding.UTF8.GetString(e.Data)}{Environment.NewLine}";
-            });
+                txtInfo.Text += $"Server: {Encoding.UTF8.GetString(e.Data)}{Environment.NewLine}"; //encoding.UTF--> gelen datayı stringe dönüştürüyoor.
+            }); //birden fazla client bağlamamıza yarıyor.
             }
 
         private void Events_Disconnected(object sender, ConnectionEventArgs e)

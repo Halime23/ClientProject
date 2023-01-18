@@ -6,6 +6,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -18,17 +19,18 @@ namespace ServerProject
             InitializeComponent();
         }
 
-        SimpleTcpServer server;
-
-        private void btnStart_Click(object sender, EventArgs e)
+        SimpleTcpServer server; //SERVER kütüphaneyi çeğırdık
+        
+        private void btnStart_Click(object sender, EventArgs e) //Start butonunna bağlanma kodu
         {
-            server.Start();
-            txtInfo.Text += $"Starting...{Environment.NewLine}";
+            Thread.Sleep(1000);
+            server.Start(); //start üzerinde işlem yapıyoruz
+            txtInfo.Text += $"Starting...{Environment.NewLine}"; //başlıyoruz mesajı verdik
             btnStart.Enabled = false;
             btnSend.Enabled = true;
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void Form1_Load(object sender, EventArgs e) //connected, disconnected and datareceived tanımlandı
         {
             btnSend.Enabled = false;
             server = new SimpleTcpServer(txtIP.Text);
@@ -51,7 +53,7 @@ namespace ServerProject
             this.Invoke((MethodInvoker)delegate
             {
                 txtInfo.Text += $"{e.IpPort} disconnected.{Environment.NewLine}";
-                lstClientIP.Items.Remove(e.IpPort);
+                lstClientIP.Items.Remove(e.IpPort); //disconnect yapılınca memoryde bulunan tüm portları kaldır (memory management)
             });
         }
 
@@ -60,7 +62,7 @@ namespace ServerProject
             this.Invoke((MethodInvoker)delegate
             {
                 txtInfo.Text += $"{e.IpPort} connected.{Environment.NewLine}";
-                lstClientIP.Items.Add(e.IpPort);
+                lstClientIP.Items.Add(e.IpPort); //connect olunca da bağlanan tüm port deperlerine sahip ıpleri listeye ekle
             });
         }
 
@@ -70,9 +72,10 @@ namespace ServerProject
             {
                 if (!string.IsNullOrEmpty(txtMessage.Text) && lstClientIP.SelectedItem != null) //Check message & select client IP from listbox
                 {
+                    Thread.Sleep(1000);
                     server.Send(lstClientIP.SelectedItem.ToString(), txtMessage.Text);
                     txtInfo.Text += $"Server: {txtMessage.Text}{Environment.NewLine}";
-                    txtMessage.Text = string.Empty;
+                    txtMessage.Text = string.Empty; //mesajı seçtiğim ıpdeki client'a gönder
                 }
 
             }
